@@ -9,7 +9,6 @@ from math import pi
 import numpy as np
 
 
-# TODO
 def get_minkowsky_sum(original_shape: Polygon, r: float) -> Polygon:
     """
     Get the polygon representing the Minkowsky sum
@@ -63,7 +62,22 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
     :param dest: The destination of the query. None for part 1.
     :return: A list of LineStrings holding the edges of the visibility graph
     """
-    pass
+    vis_graph = []
+    # Create a list of all vertices of polygons
+    v_list = [vertex for obstacle in obstacles for vertex in obstacle.exterior.coords[:-1]]
+    # for each vertice connect to all other vertices and collision check
+    for i, v in enumerate(v_list):
+        for j,w in enumerate(v_list[i+1:]):
+            crosses = False
+            line = LineString([v, w])
+            for obstacle in obstacles:
+                if line.within(obstacle) or line.crosses(obstacle):
+                    crosses = True
+                    break
+            if not crosses:
+                vis_graph.append(line)
+
+    return vis_graph
 
 
 def is_valid_file(parser, arg):
