@@ -20,30 +20,34 @@ def get_minkowsky_sum(original_shape: Polygon, r: float) -> Polygon:
     # Reorient the polygon so that vertices are in clockwise direction
     original_shape = orient(original_shape, sign=1.0)
     obstacle = np.array(original_shape.exterior.coords)
-    obstacle = np.append(obstacle[:-1], obstacle[:2],0)
+    obstacle = np.append(obstacle[:-1], obstacle[:2], 0)
     robot = np.array([(0, -r), (r, 0), (0, r), (-r, 0), (0, -r), (r, 0)])
-    m = len(obstacle)-2
+    m = len(obstacle) - 2
     n = 4
     poly_sum = []
     i = 0
     j = 0
-    while i<n or j < m:
-        poly_sum.append(robot[i]+obstacle[j])
+    while i < n or j < m:
+        poly_sum.append(robot[i] + obstacle[j])
         robot_diff = robot[i + 1] - robot[i]
-        obstacle_diff = obstacle[j+1]-obstacle[j]
+        obstacle_diff = obstacle[j + 1] - obstacle[j]
         angle_robot = atan2(robot_diff[1], robot_diff[0])
+
+        # Make sure all angles are positive
         if angle_robot < 0:
-            angle_robot +=2 * pi
-        if i >= n:
             angle_robot += 2 * pi
         angle_obs = atan2(obstacle_diff[1], obstacle_diff[0])
         if angle_obs < 0:
-            angle_obs +=2 * pi
+            angle_obs += 2 * pi
+
+        # If we complete all vertices on the polygon, we have completed a revolution.
+        # All angles thereafter are the angle plus one revolution.
+        if i >= n:
+            angle_robot += 2 * pi
         if j >= m:
             angle_obs += 2 * pi
 
-
-        if  angle_robot < angle_obs:
+        if angle_robot < angle_obs:
             i += 1
         elif angle_robot > angle_obs:
             j += 1
@@ -52,6 +56,7 @@ def get_minkowsky_sum(original_shape: Polygon, r: float) -> Polygon:
             j += 1
 
     return Polygon(poly_sum)
+
 
 # TODO
 def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> List[LineString]:
@@ -67,7 +72,7 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
     v_list = [vertex for obstacle in obstacles for vertex in obstacle.exterior.coords[:-1]]
     # for each vertice connect to all other vertices and collision check
     for i, v in enumerate(v_list):
-        for j,w in enumerate(v_list[i+1:]):
+        for j, w in enumerate(v_list[i + 1:]):
             crosses = False
             line = LineString([v, w])
             for obstacle in obstacles:
@@ -94,7 +99,8 @@ def get_points_and_dist(line):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("Robot", help="A file that holds the starting position of the robot, and the distance from the center of the robot to any of its vertices")
+    parser.add_argument("Robot",
+                        help="A file that holds the starting position of the robot, and the distance from the center of the robot to any of its vertices")
     parser.add_argument("Obstacles", help="A file that contains the obstacles in the map")
     parser.add_argument("Query", help="A file that contains the ending position for the robot.")
     args = parser.parse_args()
@@ -139,7 +145,7 @@ if __name__ == '__main__':
         dest = tuple(map(float, f.readline().split(',')))
 
     lines = get_visibility_graph(c_space_obstacles, source, dest)
-    #TODO: fill in the next line
+    # TODO: fill in the next line
     shortest_path, cost = None, None
 
     plotter3 = Plotter()
@@ -148,6 +154,5 @@ if __name__ == '__main__':
     plotter3.add_robot(dest, dist)
     plotter3.add_visibility_graph(lines)
     plotter3.add_shorterst_path(list(shortest_path))
-
 
     plotter3.show_graph()
