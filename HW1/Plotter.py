@@ -32,7 +32,7 @@ class Plotter:
 
     def add_shorterst_path(self, edges):
         current_vertice = edges[0]
-        for edge in edges:
+        for edge in edges[1:]:
             plt.plot([current_vertice[0], edge[0]], [current_vertice[1], edge[1]], color='yellow', linewidth=5,
                      alpha=0.4)
             self.add_robot(edge, self.distance_to_vertex)

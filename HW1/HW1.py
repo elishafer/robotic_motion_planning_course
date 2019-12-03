@@ -91,48 +91,49 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
 
 
 def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
-    vertices = {}
-     # create a list of vertices:
-    V = []
-    for line in lines:
-        if line.coords[0] not in V: V.append(Node(line.coords[0]))
-        if line.coords[1] not in V: V.append(Node(line.coords[1]))
-    # go over the graph using dijkstra
+    X = [Node(start)]  # A list of nodes using Node class. This is a list of visited nodes.
+    X_v = [start]  # A list of vertice coordinates that we've already explored
+    h = []  # shortest edges heap
     i = 0
-    A = {start:0}
-    B = {}
-    X = [Node(start)]
-    X_v = [start]
-    h = []
     while i < len(lines):
-
         for line in lines:
-            if line.distance(Point(X[-1].x)) < 1e-8:
-                if line.coords[0] == X[-1].x:
-                    if line.coords[1] not in X_v:
-                        heapq.heappush(h, (line.length + X[-1].cost, (line.coords[1], len(X)-1)))
-                elif line.coords[0] not in X_v:
-                    heapq.heappush(h, (line.length + X[-1].cost, (line.coords[0], len(X)-1)))
+            if line.distance(Point(X[-1].x)) < 1e-8:                        # if point is on the line
+                if line.coords[0] == X[-1].x:                               # check on which end of the line it's located
+                    if line.coords[1] not in X_v:                           # check that we've not visited it yet
+                        heapq.heappush(h, (line.length + X[-1].cost,
+                                           (line.coords[1], len(X)-1)))     # add to heap
+                        X_v.append(line.coords[1])                          # add to list of visited nodes
+                elif line.coords[1] == X[-1].x:
+                    if line.coords[0] not in X_v:
+                        heapq.heappush(h, (line.length + X[-1].cost, (line.coords[0], len(X)-1)))
+                        X_v.append(line.coords[0])
         cost, node = heapq.heappop(h)
         node = Node(*node)
         node.cost = cost
         X.append(node)
-        X_v.append(node.x)
+
         if X[-1].x == goal:
             # We found the goal, exit the while loop
             break
 
+        # The following updates keys in the heap to use the smallest cost obtained after
+        # adding the last node to explored.
         for line in lines:
-            for e,v in enumerate(h):
-                node = Node(*v[1])
-                if line.distance(Point(node.x)) < 1e-8:
-                    key = v[0]
-                    cost = min(node.cost, X[-1].cost + line.length)
-                    if X[-1].cost + line.length < node.cost:
-                        node.parent = X[-1]
-                        node.cost = X[-1].cost + line.length
-                        h.remove(e)
-                        heapq.heappush(h, (node.cost, node))
+            if line.coords[0] == X[-1].x or line.coords[1] == X[-1].x:
+                for e,v in enumerate(h):
+                    node = Node(*v[1])
+                    node.cost = v[0]
+                    if line.coords[0] == node.x or line.coords[1] == node.x:
+                        if X[-1].cost + line.length < node.cost:
+                            node.parent = len(X) - 1
+                            node.cost = X[-1].cost + line.length
+                            # The following removes the vertex from the heap:
+                            h[e] = h[-1]
+                            h.pop()
+                            if e < len(h):
+                                heapq._siftup(h, e)
+                                heapq._siftdown(h, 0, e)
+                            heapq.heappush(h, (node.cost, (node.x, node.parent)))
         i += 1
 
     path = []
@@ -141,15 +142,10 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
         node = X[last_index]
         path.append(node.x)
         last_index = node.parent
+    path.append(start)
     path.reverse()
 
     return path, X[-1].cost
-
-
-        # For each vertex connected to new edge
-        # Use heap to store shortest edges
-        # pop lowest value edge
-        # set the path value for that edge to be value of parent edge
 
 
 class Node():
