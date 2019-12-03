@@ -90,6 +90,76 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
     return vis_graph
 
 
+def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
+    vertices = {}
+     # create a list of vertices:
+    V = []
+    for line in lines:
+        if line.coords[0] not in V: V.append(Node(line.coords[0]))
+        if line.coords[1] not in V: V.append(Node(line.coords[1]))
+    # go over the graph using dijkstra
+    i = 0
+    A = {start:0}
+    B = {}
+    X = [Node(start)]
+    X_v = [start]
+    h = []
+    while i < len(lines):
+
+        for line in lines:
+            if line.distance(Point(X[-1].x)) < 1e-8:
+                if line.coords[0] == X[-1].x:
+                    if line.coords[1] not in X_v:
+                        heapq.heappush(h, (line.length + X[-1].cost, (line.coords[1], len(X)-1)))
+                elif line.coords[0] not in X_v:
+                    heapq.heappush(h, (line.length + X[-1].cost, (line.coords[0], len(X)-1)))
+        cost, node = heapq.heappop(h)
+        node = Node(*node)
+        node.cost = cost
+        X.append(node)
+        X_v.append(node.x)
+        if X[-1].x == goal:
+            # We found the goal, exit the while loop
+            break
+
+        for line in lines:
+            for e,v in enumerate(h):
+                node = Node(*v[1])
+                if line.distance(Point(node.x)) < 1e-8:
+                    key = v[0]
+                    cost = min(node.cost, X[-1].cost + line.length)
+                    if X[-1].cost + line.length < node.cost:
+                        node.parent = X[-1]
+                        node.cost = X[-1].cost + line.length
+                        h.remove(e)
+                        heapq.heappush(h, (node.cost, node))
+        i += 1
+
+    path = []
+    last_index = len(X) -1
+    while X[last_index].parent is not None:
+        node = X[last_index]
+        path.append(node.x)
+        last_index = node.parent
+    path.reverse()
+
+    return path, X[-1].cost
+
+
+        # For each vertex connected to new edge
+        # Use heap to store shortest edges
+        # pop lowest value edge
+        # set the path value for that edge to be value of parent edge
+
+
+class Node():
+
+    def __init__(self, x, parent=None, cost=0.0):
+        self.x = x
+        self.parent = parent
+        self.cost = cost
+
+
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
         parser.error("The file %s does not exist!" % arg)
@@ -151,7 +221,8 @@ if __name__ == '__main__':
 
     lines = get_visibility_graph(c_space_obstacles, source, dest)
     # TODO: fill in the next line
-    shortest_path, cost = None, None
+
+    shortest_path, cost = dijkstra(lines, source, dest)
 
     plotter3 = Plotter()
     plotter3.add_robot(source, dist)
