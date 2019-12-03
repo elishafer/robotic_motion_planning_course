@@ -4,9 +4,11 @@ from typing import List, Tuple
 
 from Plotter import Plotter
 from shapely.geometry.polygon import Polygon, LineString, orient
+from shapely.geometry import Point
 from math import atan2
 from math import pi
 import numpy as np
+import heapq
 
 
 def get_minkowsky_sum(original_shape: Polygon, r: float) -> Polygon:
@@ -58,7 +60,6 @@ def get_minkowsky_sum(original_shape: Polygon, r: float) -> Polygon:
     return Polygon(poly_sum)
 
 
-# TODO
 def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> List[LineString]:
     """
     Get The visibility graph of a given map
@@ -70,6 +71,10 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
     vis_graph = []
     # Create a list of all vertices of polygons
     v_list = [vertex for obstacle in obstacles for vertex in obstacle.exterior.coords[:-1]]
+    if source is not None:
+        v_list.append(source)
+    if dest is not None:
+        v_list.append(dest)
     # for each vertice connect to all other vertices and collision check
     for i, v in enumerate(v_list):
         for j, w in enumerate(v_list[i + 1:]):
