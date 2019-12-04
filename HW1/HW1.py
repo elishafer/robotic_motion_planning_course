@@ -92,21 +92,11 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
 
 def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
     X = [Node(start)]  # A list of nodes using Node class. This is a list of visited nodes.
-    X_v = [start]  # A list of vertice coordinates that we've already explored
+    X_v = []  # A list of vertice coordinates that we've already explored
     h = []  # shortest edges heap
     i = 0
-    while i < len(lines):
-        for line in lines:
-            if line.distance(Point(X[-1].x)) < 1e-8:                        # if point is on the line
-                if line.coords[0] == X[-1].x:                               # check on which end of the line it's located
-                    if line.coords[1] not in X_v:                           # check that we've not visited it yet
-                        heapq.heappush(h, (line.length + X[-1].cost,
-                                           (line.coords[1], len(X)-1)))     # add to heap
-                        X_v.append(line.coords[1])                          # add to list of visited nodes
-                elif line.coords[1] == X[-1].x:
-                    if line.coords[0] not in X_v:
-                        heapq.heappush(h, (line.length + X[-1].cost, (line.coords[0], len(X)-1)))
-                        X_v.append(line.coords[0])
+    heapq.heappush(h, (0, (start,None)))
+    while i < len(lines):  # actually loop should end on number of vertices.
         cost, node = heapq.heappop(h)
         node = Node(*node)
         node.cost = cost
@@ -116,10 +106,12 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
             # We found the goal, exit the while loop
             break
 
-        # The following updates keys in the heap to use the smallest cost obtained after
-        # adding the last node to explored.
+
         for line in lines:
-            if line.coords[0] == X[-1].x or line.coords[1] == X[-1].x:
+            if line.coords[0] == X[-1].x or line.coords[1] == X[-1].x:      # if point is on the line
+
+                # The following updates keys in the heap to use the smallest cost obtained after
+                # adding the last node to explored.
                 for e,v in enumerate(h):
                     node = Node(*v[1])
                     node.cost = v[0]
@@ -134,6 +126,17 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
                                 heapq._siftup(h, e)
                                 heapq._siftdown(h, 0, e)
                             heapq.heappush(h, (node.cost, (node.x, node.parent)))
+
+                # The following we add nodes that we haven't visited yet to the heap:
+                if line.coords[0] == X[-1].x:                               # check on which end of the line it's located
+                    if line.coords[1] not in X_v:                           # check that we've not visited it yet
+                        heapq.heappush(h, (line.length + X[-1].cost,
+                                           (line.coords[1], len(X)-1)))     # add to heap
+                        X_v.append(line.coords[1])                          # add to list of visited nodes
+                elif line.coords[1] == X[-1].x:
+                    if line.coords[0] not in X_v:
+                        heapq.heappush(h, (line.length + X[-1].cost, (line.coords[0], len(X)-1)))
+                        X_v.append(line.coords[0])
         i += 1
 
     path = []
