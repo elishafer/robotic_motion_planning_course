@@ -91,12 +91,21 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
 
 
 def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
-    X = [Node(start)]  # A list of nodes using Node class. This is a list of visited nodes.
-    X_v = []  # A list of vertice coordinates that we've already explored
+    X = []   # A list of nodes using Node class. This is a list of visited nodes.
+    X_v = []            # A list of vertice coordinates that we've already explored
+    # create a list of vertices:
+    V = []
+    for line in lines:
+        if line.coords[0] not in V: V.append(line.coords[0])
+        if line.coords[1] not in V: V.append(line.coords[1])
+    neighbours = {v: [] for v in V}
+    for line in lines:
+        neighbours[line.coords[0]] += [(line.coords[1], line.length)]
+        neighbours[line.coords[1]] += [(line.coords[0], line.length)]
     h = []  # shortest edges heap
+    heapq.heappush(h, (0, (start,None)))    # Initialise heap with node (cost, (coords, parent)
     i = 0
-    heapq.heappush(h, (0, (start,None)))
-    while i < len(lines):  # actually loop should end on number of vertices.
+    while i < len(lines):                   # actually loop should end on number of vertices.
         cost, node = heapq.heappop(h)
         node = Node(*node)
         node.cost = cost
@@ -106,37 +115,31 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
             # We found the goal, exit the while loop
             break
 
+        for j, neighbour in enumerate(neighbours[X[-1].x]):
 
-        for line in lines:
-            if line.coords[0] == X[-1].x or line.coords[1] == X[-1].x:      # if point is on the line
+            # The following updates keys in the heap to use the smallest cost obtained after
+            # adding the last node to explored.
+            for e,v in enumerate(h):
+                node = Node(*v[1])
+                node.cost = v[0]
+                if neighbour[0] == node.x:
+                    if X[-1].cost + neighbour[1] < node.cost:
+                        node.parent = len(X) - 1
+                        node.cost = X[-1].cost + neighbour[1]
+                        # The following removes the vertex from the heap:
+                        h[e] = h[-1]
+                        h.pop()
+                        if e < len(h):
+                            heapq._siftup(h, e)
+                            heapq._siftdown(h, 0, e)
+                        heapq.heappush(h, (node.cost, (node.x, node.parent)))
 
-                # The following updates keys in the heap to use the smallest cost obtained after
-                # adding the last node to explored.
-                for e,v in enumerate(h):
-                    node = Node(*v[1])
-                    node.cost = v[0]
-                    if line.coords[0] == node.x or line.coords[1] == node.x:
-                        if X[-1].cost + line.length < node.cost:
-                            node.parent = len(X) - 1
-                            node.cost = X[-1].cost + line.length
-                            # The following removes the vertex from the heap:
-                            h[e] = h[-1]
-                            h.pop()
-                            if e < len(h):
-                                heapq._siftup(h, e)
-                                heapq._siftdown(h, 0, e)
-                            heapq.heappush(h, (node.cost, (node.x, node.parent)))
-
-                # The following we add nodes that we haven't visited yet to the heap:
-                if line.coords[0] == X[-1].x:                               # check on which end of the line it's located
-                    if line.coords[1] not in X_v:                           # check that we've not visited it yet
-                        heapq.heappush(h, (line.length + X[-1].cost,
-                                           (line.coords[1], len(X)-1)))     # add to heap
-                        X_v.append(line.coords[1])                          # add to list of visited nodes
-                elif line.coords[1] == X[-1].x:
-                    if line.coords[0] not in X_v:
-                        heapq.heappush(h, (line.length + X[-1].cost, (line.coords[0], len(X)-1)))
-                        X_v.append(line.coords[0])
+            # The following we add nodes that we haven't visited yet to the heap:
+            if neighbour[0] not in X_v:                           # check that we've not visited it yet
+                heapq.heappush(h, (neighbour[1] + X[-1].cost,
+                                   (neighbour[0], len(X)-1)))     # add to heap
+                X_v.append(neighbour[0])                        # add to list of visited nodes
+                # del neighbours[X[-1].x][j]
         i += 1
 
     path = []
