@@ -92,7 +92,7 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
 
 def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
     X = []   # A list of nodes using Node class. This is a list of visited nodes.
-    X_v = []            # A list of vertice coordinates that we've already explored
+    X_v = [] # A list of vertice coordinates that we've already calculated the cost to.
     # create a list of vertices:
     V = []
     for line in lines:
@@ -116,16 +116,18 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
             break
 
         for j, neighbour in enumerate(neighbours[X[-1].x]):
-
             # The following updates keys in the heap to use the smallest cost obtained after
             # adding the last node to explored.
+            neighbour_coords = neighbour[0]
+            neighbour_dist   = neighbour[1]
+            # The following is to check if we've already calculated a the cost to the neighbour
             for e,v in enumerate(h):
                 node = Node(*v[1])
                 node.cost = v[0]
-                if neighbour[0] == node.x:
-                    if X[-1].cost + neighbour[1] < node.cost:
+                if neighbour_coords == node.x:
+                    if X[-1].cost + neighbour_dist < node.cost:
                         node.parent = len(X) - 1
-                        node.cost = X[-1].cost + neighbour[1]
+                        node.cost = X[-1].cost + neighbour_dist
                         # The following removes the vertex from the heap:
                         h[e] = h[-1]
                         h.pop()
@@ -135,10 +137,10 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
                         heapq.heappush(h, (node.cost, (node.x, node.parent)))
 
             # The following we add nodes that we haven't visited yet to the heap:
-            if neighbour[0] not in X_v:                           # check that we've not visited it yet
-                heapq.heappush(h, (neighbour[1] + X[-1].cost,
-                                   (neighbour[0], len(X)-1)))     # add to heap
-                X_v.append(neighbour[0])                        # add to list of visited nodes
+            if neighbour_coords not in X_v:                           # check that we've not visited it yet
+                heapq.heappush(h, (neighbour_dist + X[-1].cost,
+                                   (neighbour_coords, len(X)-1)))     # add to heap
+                X_v.append(neighbour_coords)                        # add to list of visited nodes
                 # del neighbours[X[-1].x][j]
         i += 1
 
