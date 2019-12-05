@@ -136,7 +136,7 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
                             heapq._siftdown(h, 0, e)
                         heapq.heappush(h, (node.cost, (node.x, node.parent)))
 
-        for j, neighbour in enumerate(neighbours[X[-1].x]):
+        for j, neighbour in enumerate(neighbours[X[-1].x]): # Gives a total of n heap operations
             neighbour_coords = neighbour[0]
             neighbour_dist = neighbour[1]
             # The following we add nodes that we haven't visited yet to the heap:
