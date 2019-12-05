@@ -92,24 +92,26 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
 
 def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
     X = []   # A list of nodes using Node class. This is a list of visited nodes.
-    X_v = [] # A list of vertice coordinates that we've already calculated the cost to.
+    X_v = set() # A list of vertice coordinates that we've already calculated the cost to.
     # create a list of vertices:
-    V = []
+    V = set()
     for line in lines:
-        if line.coords[0] not in V: V.append(line.coords[0])
-        if line.coords[1] not in V: V.append(line.coords[1])
+        if line.coords[0] not in V: V.add(line.coords[0])
+        if line.coords[1] not in V: V.add(line.coords[1])
     neighbours = {v: [] for v in V}
     for line in lines:
         neighbours[line.coords[0]] += [(line.coords[1], line.length)]
         neighbours[line.coords[1]] += [(line.coords[0], line.length)]
     h = []  # shortest edges heap
     heapq.heappush(h, (0, (start,None)))    # Initialise heap with node (cost, (coords, parent)
+    X_v.add(start)
     i = 0
-    while i <= len(V):                   # actually loop should end on number of vertices.
+    while i <= len(V):
         cost, node = heapq.heappop(h)
         node = Node(*node)
         node.cost = cost
         X.append(node)
+        # X_v.remove(node.x)
 
         if X[-1].x == goal:
             # We found the goal, exit the while loop
@@ -118,23 +120,24 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
         for j, neighbour in enumerate(neighbours[X[-1].x]):
             # The following updates keys in the heap to use the smallest cost obtained after
             # adding the last node to explored.
-            neighbour_coords = neighbour[0]
-            neighbour_dist   = neighbour[1]
-            # The following is to check if we've already calculated a the cost to the neighbour
-            for e,v in enumerate(h):
-                node = Node(*v[1])
-                node.cost = v[0]
-                if neighbour_coords == node.x:
-                    if X[-1].cost + neighbour_dist < node.cost:
-                        node.parent = len(X) - 1
-                        node.cost = X[-1].cost + neighbour_dist
-                        # The following removes the vertex from the heap:
-                        h[e] = h[-1]
-                        h.pop()
-                        if e < len(h):
-                            heapq._siftup(h, e)
-                            heapq._siftdown(h, 0, e)
-                        heapq.heappush(h, (node.cost, (node.x, node.parent)))
+            if neighbour[0] in X_v:
+                neighbour_coords = neighbour[0]
+                neighbour_dist   = neighbour[1]
+                # The following is to check if we've already calculated a the cost to the neighbour
+                for e,v in enumerate(h):
+                    node = Node(*v[1])
+                    node.cost = v[0]
+                    if neighbour_coords == node.x:
+                        if X[-1].cost + neighbour_dist < node.cost:
+                            node.parent = len(X) - 1
+                            node.cost = X[-1].cost + neighbour_dist
+                            # The following removes the vertex from the heap:
+                            h[e] = h[-1]
+                            h.pop()
+                            if e < len(h):
+                                heapq._siftup(h, e)
+                                heapq._siftdown(h, 0, e)
+                            heapq.heappush(h, (node.cost, (node.x, node.parent)))
 
         for j, neighbour in enumerate(neighbours[X[-1].x]): # Gives a total of n heap operations
             neighbour_coords = neighbour[0]
@@ -143,8 +146,7 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
             if neighbour_coords not in X_v:                           # check that we've not visited it yet
                 heapq.heappush(h, (neighbour_dist + X[-1].cost,
                                    (neighbour_coords, len(X)-1)))     # add to heap
-                X_v.append(neighbour_coords)                        # add to list of visited nodes
-                # del neighbours[X[-1].x][j]
+                X_v.add(neighbour_coords)                        # add to list of visited nodes
         i += 1
 
     path = []
@@ -230,6 +232,7 @@ if __name__ == '__main__':
     # TODO: fill in the next line
 
     shortest_path, cost = dijkstra(lines, source, dest)
+    print("cost: ", cost)
 
     plotter3 = Plotter()
     plotter3.add_robot(source, dist)
