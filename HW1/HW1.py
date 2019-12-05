@@ -105,7 +105,7 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
     h = []  # shortest edges heap
     heapq.heappush(h, (0, (start,None)))    # Initialise heap with node (cost, (coords, parent)
     i = 0
-    while i < len(lines):                   # actually loop should end on number of vertices.
+    while i <= len(V):                   # actually loop should end on number of vertices.
         cost, node = heapq.heappop(h)
         node = Node(*node)
         node.cost = cost
@@ -136,6 +136,9 @@ def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
                             heapq._siftdown(h, 0, e)
                         heapq.heappush(h, (node.cost, (node.x, node.parent)))
 
+        for j, neighbour in enumerate(neighbours[X[-1].x]):
+            neighbour_coords = neighbour[0]
+            neighbour_dist = neighbour[1]
             # The following we add nodes that we haven't visited yet to the heap:
             if neighbour_coords not in X_v:                           # check that we've not visited it yet
                 heapq.heappush(h, (neighbour_dist + X[-1].cost,
