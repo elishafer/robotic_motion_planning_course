@@ -8,7 +8,6 @@ from shapely.geometry import Point
 from math import atan2
 from math import pi
 import numpy as np
-import heapq
 
 ###########################################
 # Algorithmic Motion Planning (236610)   ##
@@ -94,23 +93,6 @@ def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> Li
 
     return vis_graph
 
-class BinaryMinHeap:
-	def __init__(self):
-		self.heap = []
-
-	def push(self, cost, item):
-		assert(cost >= 0)
-		heapq.heappush(self.heap, (cost, item))
-
-	def pop(self):
-		return heapq.heappop(self.heap)
-
-	def empty(self):
-		return (len(self.heap) == 0)
-
-	def __len__(self):
-		return len(self.heap)
-
 def get_adjacency_list(lines: List[LineString]) -> Dict[Tuple, List[Tuple]]:
 	"""
 	Creates an Adjacency List from the list of edges in the visibility graph.
@@ -142,21 +124,19 @@ def construct_path(parent_map: Dict[Tuple, Tuple], goal: Tuple) -> List[Tuple]:
 
 def dijkstra(lines: List[LineString], start: Tuple, goal: Tuple) -> Tuple[List[Tuple], float]:
 	"""
-	Performs Dijkstra's Algorithm using an Adjacency List and a Binary Min Heap Priority Queue
+	Performs Dijkstra's Algorithm
 	"""
 	adjacency_list = get_adjacency_list(lines)
 	cost_map, parent_map = {}, {}
-	for node in adjacency_list.keys():
+	unvisited = set(adjacency_list.keys())
+	for node in unvisited:
 		cost_map[node] = 0.0 if node == start else float('inf')
 		parent_map[node] = None
 
-	visited = set()
-	unvisited = BinaryMinHeap()
-	unvisited.push(0, start)
-
-	while not unvisited.empty():
-		(curr_cost, curr_node) = unvisited.pop()
-		visited.add(curr_node)
+	while unvisited:
+		curr_node = min(unvisited, key = lambda node: cost_map[node])
+		curr_cost = cost_map[curr_node]
+		unvisited.remove(curr_node)
 		adj_nodes = adjacency_list[curr_node]
 		for adj_node in adj_nodes:
 			cost_curr_adj = curr_cost + float(np.linalg.norm(np.array(curr_node) - np.array(adj_node)))
@@ -164,88 +144,10 @@ def dijkstra(lines: List[LineString], start: Tuple, goal: Tuple) -> Tuple[List[T
 			if (cost_curr_adj < prev_cost):
 				cost_map[adj_node] = cost_curr_adj
 				parent_map[adj_node] = curr_node
-			if (adj_node not in visited):
-				unvisited.push(cost_map[adj_node], adj_node)
+		if curr_node == goal:
+			break
 
 	return construct_path(parent_map, goal), cost_map[goal]
-
-
-
-# def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
-#     X = []   # A list of nodes using Node class. This is a list of visited nodes.
-#     X_v = [] # A list of vertice coordinates that we've already calculated the cost to.
-#     # create a list of vertices:
-#     V = []
-#     for line in lines:
-#         if line.coords[0] not in V: V.append(line.coords[0])
-#         if line.coords[1] not in V: V.append(line.coords[1])
-#     neighbours = {v: [] for v in V}
-#     for line in lines:
-#         neighbours[line.coords[0]] += [(line.coords[1], line.length)]
-#         neighbours[line.coords[1]] += [(line.coords[0], line.length)]
-#     h = []  # shortest edges heap
-#     heapq.heappush(h, (0, (start,None)))    # Initialise heap with node (cost, (coords, parent)
-#     i = 0
-#     while i <= len(V):                   # actually loop should end on number of vertices.
-#         cost, node = heapq.heappop(h)
-#         node = Node(*node)
-#         node.cost = cost
-#         X.append(node)
-
-#         if X[-1].x == goal:
-#             # We found the goal, exit the while loop
-#             break
-
-#         for j, neighbour in enumerate(neighbours[X[-1].x]):
-#             # The following updates keys in the heap to use the smallest cost obtained after
-#             # adding the last node to explored.
-#             neighbour_coords = neighbour[0]
-#             neighbour_dist   = neighbour[1]
-#             # The following is to check if we've already calculated a the cost to the neighbour
-#             for e,v in enumerate(h):
-#                 node = Node(*v[1])
-#                 node.cost = v[0]
-#                 if neighbour_coords == node.x:
-#                     if X[-1].cost + neighbour_dist < node.cost:
-#                         node.parent = len(X) - 1
-#                         node.cost = X[-1].cost + neighbour_dist
-#                         # The following removes the vertex from the heap:
-#                         h[e] = h[-1]
-#                         h.pop()
-#                         if e < len(h):
-#                             heapq._siftup(h, e)
-#                             heapq._siftdown(h, 0, e)
-#                         heapq.heappush(h, (node.cost, (node.x, node.parent)))
-
-#         for j, neighbour in enumerate(neighbours[X[-1].x]):
-#             neighbour_coords = neighbour[0]
-#             neighbour_dist = neighbour[1]
-#             # The following we add nodes that we haven't visited yet to the heap:
-#             if neighbour_coords not in X_v:                           # check that we've not visited it yet
-#                 heapq.heappush(h, (neighbour_dist + X[-1].cost,
-#                                    (neighbour_coords, len(X)-1)))     # add to heap
-#                 X_v.append(neighbour_coords)                        # add to list of visited nodes
-#                 # del neighbours[X[-1].x][j]
-#         i += 1
-
-#     path = []
-#     last_index = len(X) -1
-#     while X[last_index].parent is not None:
-#         node = X[last_index]
-#         path.append(node.x)
-#         last_index = node.parent
-#     path.append(start)
-#     path.reverse()
-
-#     return path, X[-1].cost
-
-
-# class Node():
-
-#     def __init__(self, x, parent=None, cost=0.0):
-#         self.x = x
-#         self.parent = parent
-#         self.cost = cost
 
 
 def is_valid_file(parser, arg):
