@@ -65,35 +65,34 @@ def get_minkowsky_sum(original_shape: Polygon, r: float) -> Polygon:
 
 	return Polygon(poly_sum)
 
-
 def get_visibility_graph(obstacles: List[Polygon], source=None, dest=None) -> List[LineString]:
-	"""
-	Get The visibility graph of a given map
-	:param obstacles: A list of the obstacles in the map
-	:param source: The starting position of the robot. None for part 1.
-	:param dest: The destination of the query. None for part 1.
-	:return: A list of LineStrings holding the edges of the visibility graph
-	"""
-	vis_graph = []
-	# Create a list of all vertices of polygons
-	v_list = [vertex for obstacle in obstacles for vertex in obstacle.exterior.coords[:-1]]
-	if source is not None:
-		v_list.append(source)
-	if dest is not None:
-		v_list.append(dest)
-	# for each vertice connect to all other vertices and collision check
-	for i, v in enumerate(v_list):
-		for j, w in enumerate(v_list[i + 1:]):
-			crosses = False
-			line = LineString([v, w])
-			for obstacle in obstacles:
-				if line.within(obstacle) or line.crosses(obstacle):
-					crosses = True
-					break
-			if not crosses:
-				vis_graph.append(line)
+    """
+    Get The visibility graph of a given map
+    :param obstacles: A list of the obstacles in the map
+    :param source: The starting position of the robot. None for part 1.
+    :param dest: The destination of the query. None for part 1.
+    :return: A list of LineStrings holding the edges of the visibility graph
+    """
+    vis_graph = []
+    # Create a list of all vertices of polygons
+    v_list = [vertex for obstacle in obstacles for vertex in obstacle.exterior.coords[:-1]]
+    if source is not None:
+        v_list.append(source)
+    if dest is not None:
+        v_list.append(dest)
+    # for each vertice connect to all other vertices and collision check
+    for i, v in enumerate(v_list):
+        for j, w in enumerate(v_list[i + 1:]):
+            crosses = False
+            line = LineString([v, w])
+            for obstacle in obstacles:
+                if line.within(obstacle) or line.crosses(obstacle):
+                    crosses = True
+                    break
+            if not crosses:
+                vis_graph.append(line)
 
-	return vis_graph
+    return vis_graph
 
 class BinaryMinHeap:
 	def __init__(self):
@@ -170,23 +169,24 @@ def dijkstra(lines: List[LineString], start: Tuple, goal: Tuple) -> Tuple[List[T
 
 	return construct_path(parent_map, goal), cost_map[goal]
 
+
+
 # def dijkstra(lines: List[LineString], start: tuple, goal: tuple):
-#     X = [Node(start)]  # A list of nodes using Node class. This is a list of visited nodes.
-#     X_v = [start]  # A list of vertice coordinates that we've already explored
+#     X = []   # A list of nodes using Node class. This is a list of visited nodes.
+#     X_v = [] # A list of vertice coordinates that we've already calculated the cost to.
+#     # create a list of vertices:
+#     V = []
+#     for line in lines:
+#         if line.coords[0] not in V: V.append(line.coords[0])
+#         if line.coords[1] not in V: V.append(line.coords[1])
+#     neighbours = {v: [] for v in V}
+#     for line in lines:
+#         neighbours[line.coords[0]] += [(line.coords[1], line.length)]
+#         neighbours[line.coords[1]] += [(line.coords[0], line.length)]
 #     h = []  # shortest edges heap
+#     heapq.heappush(h, (0, (start,None)))    # Initialise heap with node (cost, (coords, parent)
 #     i = 0
-#     while i < len(lines):
-#         for line in lines:
-#             if line.distance(Point(X[-1].x)) < 1e-8:                        # if point is on the line
-#                 if line.coords[0] == X[-1].x:                               # check on which end of the line it's located
-#                     if line.coords[1] not in X_v:                           # check that we've not visited it yet
-#                         heapq.heappush(h, (line.length + X[-1].cost,
-#                                            (line.coords[1], len(X)-1)))     # add to heap
-#                         X_v.append(line.coords[1])                          # add to list of visited nodes
-#                 elif line.coords[1] == X[-1].x:
-#                     if line.coords[0] not in X_v:
-#                         heapq.heappush(h, (line.length + X[-1].cost, (line.coords[0], len(X)-1)))
-#                         X_v.append(line.coords[0])
+#     while i <= len(V):                   # actually loop should end on number of vertices.
 #         cost, node = heapq.heappop(h)
 #         node = Node(*node)
 #         node.cost = cost
@@ -196,24 +196,36 @@ def dijkstra(lines: List[LineString], start: Tuple, goal: Tuple) -> Tuple[List[T
 #             # We found the goal, exit the while loop
 #             break
 
-#         # The following updates keys in the heap to use the smallest cost obtained after
-#         # adding the last node to explored.
-#         for line in lines:
-#             if line.coords[0] == X[-1].x or line.coords[1] == X[-1].x:
-#                 for e,v in enumerate(h):
-#                     node = Node(*v[1])
-#                     node.cost = v[0]
-#                     if line.coords[0] == node.x or line.coords[1] == node.x:
-#                         if X[-1].cost + line.length < node.cost:
-#                             node.parent = len(X) - 1
-#                             node.cost = X[-1].cost + line.length
-#                             # The following removes the vertex from the heap:
-#                             h[e] = h[-1]
-#                             h.pop()
-#                             if e < len(h):
-#                                 heapq._siftup(h, e)
-#                                 heapq._siftdown(h, 0, e)
-#                             heapq.heappush(h, (node.cost, (node.x, node.parent)))
+#         for j, neighbour in enumerate(neighbours[X[-1].x]):
+#             # The following updates keys in the heap to use the smallest cost obtained after
+#             # adding the last node to explored.
+#             neighbour_coords = neighbour[0]
+#             neighbour_dist   = neighbour[1]
+#             # The following is to check if we've already calculated a the cost to the neighbour
+#             for e,v in enumerate(h):
+#                 node = Node(*v[1])
+#                 node.cost = v[0]
+#                 if neighbour_coords == node.x:
+#                     if X[-1].cost + neighbour_dist < node.cost:
+#                         node.parent = len(X) - 1
+#                         node.cost = X[-1].cost + neighbour_dist
+#                         # The following removes the vertex from the heap:
+#                         h[e] = h[-1]
+#                         h.pop()
+#                         if e < len(h):
+#                             heapq._siftup(h, e)
+#                             heapq._siftdown(h, 0, e)
+#                         heapq.heappush(h, (node.cost, (node.x, node.parent)))
+
+#         for j, neighbour in enumerate(neighbours[X[-1].x]):
+#             neighbour_coords = neighbour[0]
+#             neighbour_dist = neighbour[1]
+#             # The following we add nodes that we haven't visited yet to the heap:
+#             if neighbour_coords not in X_v:                           # check that we've not visited it yet
+#                 heapq.heappush(h, (neighbour_dist + X[-1].cost,
+#                                    (neighbour_coords, len(X)-1)))     # add to heap
+#                 X_v.append(neighbour_coords)                        # add to list of visited nodes
+#                 # del neighbours[X[-1].x][j]
 #         i += 1
 
 #     path = []
@@ -227,12 +239,13 @@ def dijkstra(lines: List[LineString], start: Tuple, goal: Tuple) -> Tuple[List[T
 
 #     return path, X[-1].cost
 
+
 # class Node():
 
-# 	def __init__(self, x, parent=None, cost=0.0):
-# 		self.x = x
-# 		self.parent = parent
-# 		self.cost = cost
+#     def __init__(self, x, parent=None, cost=0.0):
+#         self.x = x
+#         self.parent = parent
+#         self.cost = cost
 
 
 def is_valid_file(parser, arg):
