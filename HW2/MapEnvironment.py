@@ -1,6 +1,8 @@
 import numpy
 from IPython import embed
 from matplotlib import pyplot as plt
+from math import hypot
+from skimage import draw
 
 class MapEnvironment(object):
     
@@ -20,29 +22,24 @@ class MapEnvironment(object):
         # Display the map
         plt.imshow(self.map, interpolation='nearest')
 
+
     def compute_distance(self, start_config, end_config):
-        
-        #
-        # TODO: Implement a function which computes the distance between
-        # two configurations.
-        #
-        pass
+
+        return hypot(start_config[0] - end_config[0], start_config[1] - end_config[1])
 
 
     def state_validity_checker(self, config):
 
-        #
-        # TODO: Implement a state validity checker
-        # Return true if valid.
-        #
-        return True
+        if self.map[tuple(config)] == 0:
+            return True
+        else:
+            return False
 
     def edge_validity_checker(self, config1, config2):
 
-        #
-        # TODO: Implement an edge validity checker
-        #
-        #
+        line = draw.line(config1[0], config1[1],
+                      config2[0], config2[1])]
+        
         pass
 
     def compute_heuristic(self, config):
