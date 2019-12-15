@@ -9,13 +9,13 @@ from AStarPlanner import AStarPlanner
 
 from IPython import embed
 
-def main(planning_env, planner, start, goal):
+def main(planning_env, planner, start, goal, planner_type):
 
     # Notify.
     input('Press any key to begin planning')
 
     # Plan.
-    plan, cost = planner.Plan(start, goal)
+    plan, cost, visited = planner.Plan(start, goal)
 
     # Shortcut the path.
     # TODO (student): Do not shortcut when comparing the performance of algorithms. 
@@ -23,7 +23,10 @@ def main(planning_env, planner, start, goal):
     plan_short = planner.ShortenPath(plan)
 
     # Visualize the final path.
-    planning_env.visualize_plan(plan)
+    if planner_type == 'astar':
+        planning_env.visualize_plan(plan, visited)
+
+    # planning_env.
     print('cost: ',cost)
     embed()
 
@@ -55,4 +58,4 @@ if __name__ == "__main__":
         print('Unknown planner option: %s' % args.planner)
         exit(0)
 
-    main(planning_env, planner, args.start, args.goal)
+    main(planning_env, planner, args.start, args.goal, args.planner)

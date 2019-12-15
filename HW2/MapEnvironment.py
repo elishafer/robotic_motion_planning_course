@@ -47,14 +47,15 @@ class MapEnvironment(object):
     def compute_heuristic(self, config):
         return self.compute_distance(config, self.goal)
 
-    def visualize_plan(self, plan):
+    def visualize_plan(self, plan, visited=None):
         '''
         Visualize the final path
         @param plan Sequence of states defining the plan.
         '''
-        plt.imshow(self.map, interpolation='nearest')
+        plt.imshow(self.map, interpolation='nearest', cmap='Greys')
+        plt.imshow(visited)
         for i in range(numpy.shape(plan)[0] - 1):
             x = [plan[i,0], plan[i+1, 0]]
             y = [plan[i,1], plan[i+1, 1]]
-            plt.plot(y, x, 'k')
+            plt.plot(y, x, 'r')
         plt.show()

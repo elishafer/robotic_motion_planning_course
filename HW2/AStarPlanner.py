@@ -39,10 +39,9 @@ class AStarPlanner(object):
                 if t_g < g[neighbour]:
                     came_from[neighbour] = current
                     g[neighbour] = t_g
-                    f[neighbour] = g[neighbour] + 20 * compute_heuristic(neighbour)
+                    f[neighbour] = g[neighbour] + 1 * compute_heuristic(neighbour)
                     if neighbour not in open_set:
                         open_set[neighbour] = f[neighbour]
-
 
         plan.append(goal_config)
         current = goal_config
@@ -54,7 +53,8 @@ class AStarPlanner(object):
 
         expansion_count = np.count_nonzero(~np.isinf(g))
         print('expanded nodes:', expansion_count)
-        return np.array(plan), g[goal_config]
+
+        return np.array(plan), g[goal_config], f
 
 
     def find_neighbours(self, config, map_shape):
