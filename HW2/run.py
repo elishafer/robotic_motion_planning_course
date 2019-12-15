@@ -15,7 +15,7 @@ def main(planning_env, planner, start, goal):
     input('Press any key to begin planning')
 
     # Plan.
-    plan = planner.Plan(start, goal)
+    plan, cost = planner.Plan(start, goal)
 
     # Shortcut the path.
     # TODO (student): Do not shortcut when comparing the performance of algorithms. 
@@ -24,6 +24,7 @@ def main(planning_env, planner, start, goal):
 
     # Visualize the final path.
     planning_env.visualize_plan(plan)
+    print('cost: ',cost)
     embed()
 
 

@@ -10,6 +10,7 @@ class MapEnvironment(object):
 
         # Obtain the boundary limits.
         # Check if file exists.
+        self.goal = goal
         self.map = numpy.loadtxt(mapfile)
         self.xlimit = [1, numpy.shape(self.map)[0]] # TODO (avk): Check if this needs to flip.
         self.ylimit = [1, numpy.shape(self.map)[1]]
@@ -35,19 +36,16 @@ class MapEnvironment(object):
         else:
             return False
 
+
     def edge_validity_checker(self, config1, config2):
 
         line = draw.line(config1[0], config1[1],
-                      config2[0], config2[1])]
-        
+                         config2[0], config2[1])
         pass
 
+
     def compute_heuristic(self, config):
-        
-        #
-        # TODO: Implement a function to compute heuristic.
-        #
-        pass
+        return self.compute_distance(config, self.goal)
 
     def visualize_plan(self, plan):
         '''
