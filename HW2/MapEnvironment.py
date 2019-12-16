@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from IPython import embed
 from matplotlib import pyplot as plt
 from math import hypot
@@ -11,9 +11,9 @@ class MapEnvironment(object):
         # Obtain the boundary limits.
         # Check if file exists.
         self.goal = goal
-        self.map = numpy.loadtxt(mapfile)
-        self.xlimit = [1, numpy.shape(self.map)[0]] # TODO (avk): Check if this needs to flip.
-        self.ylimit = [1, numpy.shape(self.map)[1]]
+        self.map = np.loadtxt(mapfile)
+        self.xlimit = [1, np.shape(self.map)[0]] # TODO (avk): Check if this needs to flip.
+        self.ylimit = [1, np.shape(self.map)[1]]
 
         # Check if start and goal are within limits and collision free
         if not self.state_validity_checker(start) or not self.state_validity_checker(goal):
@@ -41,7 +41,12 @@ class MapEnvironment(object):
 
         line = draw.line(config1[0], config1[1],
                          config2[0], config2[1])
-        pass
+        a = np.where(self.map[line] >=1)
+        if np.size(a) == 0:
+            return True
+        else:
+            return False
+
 
 
     def compute_heuristic(self, config):
@@ -53,8 +58,9 @@ class MapEnvironment(object):
         @param plan Sequence of states defining the plan.
         '''
         plt.imshow(self.map, interpolation='nearest', cmap='Greys')
-        plt.imshow(visited)
-        for i in range(numpy.shape(plan)[0] - 1):
+        if visited is not None:
+            plt.imshow(visited)
+        for i in range(np.shape(plan)[0] - 1):
             x = [plan[i,0], plan[i+1, 0]]
             y = [plan[i,1], plan[i+1, 1]]
             plt.plot(y, x, 'r')

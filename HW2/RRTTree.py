@@ -8,6 +8,7 @@ class RRTTree(object):
         self.planning_env = planning_env
         self.vertices = []
         self.edges = dict()
+        # self.cost =
 
     def GetRootID(self):
         '''
@@ -22,7 +23,7 @@ class RRTTree(object):
         '''
         dists = []
         for v in self.vertices:
-            dists.append(self.planning_env.ComputeDistance(config, v))
+            dists.append(self.planning_env.compute_distance(config, v))
 
         vid, vdist = min(enumerate(dists), key=operator.itemgetter(1))
 
