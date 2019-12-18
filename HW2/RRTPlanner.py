@@ -11,13 +11,14 @@ class RRTPlanner(object):
         self.bounds = [(0, self.map_shape[0] - 1), (0,self.map_shape[1] - 1)]
         
 
-    def Plan(self, start_config, goal_config, eta=5.0, goal_sample_rate=5, max_iterations=10000):
+    def Plan(self, start_config, goal_config, eta=5.0, goal_sample_rate=5, max_iterations=5000):
         
         # Initialize an empty plan.
         plan = []
 
         # Start with adding the start configuration to the tree.
         self.tree.AddVertex(start_config)
+        self.tree.SetCost(0,0)
 
         # TODO (student): Implement your planner here.
         for i in range(max_iterations):
@@ -31,13 +32,16 @@ class RRTPlanner(object):
                     v_new_id = len(self.tree.vertices)
                     self.tree.AddVertex(v_new)
                     self.tree.AddEdge(v_nearest_id, v_new_id)
+                    self.tree.SetCost(v_new_id,
+                                      self.tree.cost[v_nearest_id] + self.planning_env.compute_distance(v_nearest, v_new))
                 else:
                     continue
             else:
                 continue
 
-            if tuple(v_new) == tuple(self.planning_env.goal):
+            if self.planning_env.compute_distance(goal_config, v_new) < 1:
                 print('goal reached!')
+                total_cost = self.tree.cost[v_new_id]
                 break
 
         plan.append(goal_config)
@@ -46,7 +50,7 @@ class RRTPlanner(object):
             plan.append(self.tree.vertices[last_index])
             last_index = self.tree.edges[last_index]
         plan.append(start_config)
-        return np.array(plan)
+        return np.array(plan), total_cost
 
     def extend(self, v_nearest, x_rand, eta):
         extend_length = self.planning_env.compute_distance(x_rand, v_nearest)

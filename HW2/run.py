@@ -18,7 +18,7 @@ def main(planning_env, planner, start, goal, planner_type):
     if planner_type == 'astar':
         plan, cost, visited = planner.Plan(start, goal)
     else:
-        plan = planner.Plan(start, goal)
+        plan, cost = planner.Plan(start, goal)
 
     # Shortcut the path.
     # TODO (student): Do not shortcut when comparing the performance of algorithms. 
@@ -32,7 +32,7 @@ def main(planning_env, planner, start, goal, planner_type):
         planning_env.visualize_plan(plan)
 
     # planning_env.
-    # print('cost: ',cost)
+    print('cost: ',cost)
     embed()
 
 

@@ -8,7 +8,7 @@ class RRTTree(object):
         self.planning_env = planning_env
         self.vertices = []
         self.edges = dict()
-        # self.cost =
+        self.cost = dict()
 
     def GetRootID(self):
         '''
@@ -45,7 +45,6 @@ class RRTTree(object):
 
         return knnIDs, [self.vertices[vid] for vid in knnIDs]
 
-
     def AddVertex(self, config):
         '''
         Add a state to the tree.
@@ -62,3 +61,6 @@ class RRTTree(object):
         @param eid end state ID
         '''
         self.edges[eid] = sid
+
+    def SetCost(self, vid, cost):
+        self.cost[vid] = cost
