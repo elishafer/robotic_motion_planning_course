@@ -64,3 +64,8 @@ class RRTTree(object):
 
     def SetCost(self, vid, cost):
         self.cost[vid] = cost
+
+    def ResetTree(self):
+        self.vertices = []
+        self.edges = dict()
+        self.cost = dict()

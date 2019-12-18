@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
-import argparse, numpy, time
+import argparse
+import numpy as np
+from time import time
+from statistics import mean, stdev
 
 from MapEnvironment import MapEnvironment
 from RRTPlanner import RRTPlanner
 from RRTStarPlanner import RRTStarPlanner
 from AStarPlanner import AStarPlanner
+
 
 from IPython import embed
 
@@ -17,8 +21,23 @@ def main(planning_env, planner, start, goal, planner_type):
     # Plan.
     if planner_type == 'astar':
         plan, cost, visited = planner.Plan(start, goal)
+        print('cost avg: ', cost)
     else:
-        plan, cost = planner.Plan(start, goal)
+        cost_list = []
+        time_list = []
+        for i in range(10):
+            time_start = time()
+            plan, cost, tree = planner.Plan(start, goal)
+            time_list.append(time() - time_start)
+            cost_list.append(cost)
+            if i < 9:
+                planner.tree.ResetTree()
+        cost = mean(cost_list)
+        print('cost avg: ', cost)
+        print('cost stdev:', stdev(cost_list))
+        print('time avg', mean(time_list))
+        print('time stdev:', stdev(time_list))
+
 
     # Shortcut the path.
     # TODO (student): Do not shortcut when comparing the performance of algorithms. 
@@ -29,10 +48,9 @@ def main(planning_env, planner, start, goal, planner_type):
     if planner_type == 'astar':
         planning_env.visualize_plan(plan, visited)
     else:
-        planning_env.visualize_plan(plan)
+        planning_env.visualize_plan(plan, tree=tree)
 
     # planning_env.
-    print('cost: ',cost)
     embed()
 
 

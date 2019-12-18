@@ -11,7 +11,7 @@ class RRTPlanner(object):
         self.bounds = [(0, self.map_shape[0] - 1), (0,self.map_shape[1] - 1)]
         
 
-    def Plan(self, start_config, goal_config, eta=5.0, goal_sample_rate=5, max_iterations=5000):
+    def Plan(self, start_config, goal_config, eta=float('Inf'), goal_sample_rate=20, max_iterations=8000):
         
         # Initialize an empty plan.
         plan = []
@@ -50,7 +50,8 @@ class RRTPlanner(object):
             plan.append(self.tree.vertices[last_index])
             last_index = self.tree.edges[last_index]
         plan.append(start_config)
-        return np.array(plan), total_cost
+
+        return np.array(plan), total_cost, self.tree
 
     def extend(self, v_nearest, x_rand, eta):
         extend_length = self.planning_env.compute_distance(x_rand, v_nearest)
