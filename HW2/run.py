@@ -22,7 +22,7 @@ def main(planning_env, planner, start, goal, planner_type):
     if planner_type == 'astar':
         plan, cost, visited = planner.Plan(start, goal)
         print('cost avg: ', cost)
-    else:
+    elif planner_type == 'rrt':
         cost_list = []
         time_list = []
         for i in range(10):
@@ -38,17 +38,25 @@ def main(planning_env, planner, start, goal, planner_type):
         print('time avg', mean(time_list))
         print('time stdev:', stdev(time_list))
 
+    elif planner_type == 'rrtconnect':
+        cost_list = []
+        planner_return = planner.Plan(start, goal)
+        if planner_return is not None:
+            plan, cost, tree = planner_return
 
-    # Shortcut the path.
+        # Shortcut the path.
     # TODO (student): Do not shortcut when comparing the performance of algorithms. 
     # Comment this line out when collecting data over performance metrics.
-    plan_short = planner.ShortenPath(plan)
+    # plan_short = planner.ShortenPath(plan)
 
     # Visualize the final path.
     if planner_type == 'astar':
         planning_env.visualize_plan(plan, visited)
-    else:
+    elif planner_type == 'rrt':
         planning_env.visualize_plan(plan, tree=tree)
+    elif planner_type == 'rrtconnect':
+        if planner_return is not None:
+            planning_env.visualize_plan(plan, tree=tree)
 
     # planning_env.
     embed()

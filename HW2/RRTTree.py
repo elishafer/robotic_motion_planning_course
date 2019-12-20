@@ -37,13 +37,14 @@ class RRTTree(object):
         '''
         dists = []
         for v in self.vertices:
-            dists.append(self.planning_env.ComputeDistance(config, v))
+            dists.append(self.planning_env.compute_distance(config, v))
 
         dists = numpy.array(dists)
+        k = min(k, len(dists) - 1)
         knnIDs = numpy.argpartition(dists, k)
-        knnDists = [dists[i] for i in knnIDs]
+        # knnDists = [dists[i] for i in knnIDs]
 
-        return knnIDs, [self.vertices[vid] for vid in knnIDs]
+        return knnIDs[:k] #, [self.vertices[vid] for vid in knnIDs]
 
     def AddVertex(self, config):
         '''
