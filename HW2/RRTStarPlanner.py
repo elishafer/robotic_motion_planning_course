@@ -12,7 +12,7 @@ class RRTStarPlanner(object):
         self.map_shape = self.planning_env.map.shape
         self.bounds = [(0, self.map_shape[0] - 1), (0, self.map_shape[1] - 1)]
 
-    def Plan(self, start_config, goal_config, eta=float(5.0), goal_sample_rate=5, timeout=float(1.0)):
+    def Plan(self, start_config, goal_config, eta=float(5.0), goal_sample_rate=5, timeout=float(1.0), sample_times=None, k_type='log'):
 
         start_time = time()
         compute_distance = self.planning_env.compute_distance
@@ -24,6 +24,8 @@ class RRTStarPlanner(object):
         self.tree.AddVertex(start_config)
         self.tree.SetCost(0, 0)
 
+        cost_at_time = dict()
+
         # TODO (student): Implement your planner here.
         while True:
             x_rand = self.sample(goal_sample_rate)
@@ -32,7 +34,10 @@ class RRTStarPlanner(object):
             v_new = self.extend(v_nearest, x_rand, eta)
             v_new = np.int_(v_new.round())
             if self.planning_env.state_validity_checker(v_new):
-                k = int(e*1.5*log(len(self.tree.vertices)))
+                if k_type == 'log':
+                    k = int(e*1.5*log(len(self.tree.vertices)))
+                elif k_type == 'const':
+                    k = 30
                 knn_ids = list(self.tree.GetKNN(v_new, k))
                 if not self.planning_env.edge_validity_checker(v_nearest, v_new):
                     continue
@@ -67,11 +72,21 @@ class RRTStarPlanner(object):
 
             # self.planning_env.visualize_plan(tree=self.tree)
 
+            if sample_times is not None:
+                if time() - start_time > sample_times[-1]:
+                    best_vid = self.get_best_vid(goal_config)
+                    if best_vid is not None:
+                        cost_at_time[sample_times[-1]] = self.tree.cost[best_vid]
+                    else:
+                        cost_at_time[sample_times[-1]] = None
+                    sample_times.pop()
+
             if time() - start_time > timeout:
                 break
 
         best_vid = self.get_best_vid(goal_config, 1.0)
         if best_vid is None:
+            print('goal not reached')
             return None
         print('goal reached!')
         total_cost = self.tree.cost[best_vid]
@@ -82,7 +97,7 @@ class RRTStarPlanner(object):
             last_index = self.tree.edges[last_index]
         plan.append(start_config)
 
-        return np.array(plan), total_cost, self.tree
+        return np.array(plan), total_cost, self.tree, cost_at_time
 
     def extend(self, v_nearest, x_rand, eta):
         extend_length = self.planning_env.compute_distance(x_rand, v_nearest)
@@ -99,12 +114,11 @@ class RRTStarPlanner(object):
         x_rand = np.array(x_rand)
         return x_rand
 
-    def get_best_vid(self, goal_config, r):
+    def get_best_vid(self, goal_config, r=1.0):
         dist_goal_list = [self.planning_env.compute_distance(v, goal_config) for v in self.tree.vertices]
         goal_ids = [dist_goal_list.index(i) for i in dist_goal_list if i <= r]
 
         if not goal_ids:
-            print('goal not reached')
             return None
 
         mincost = min(self.tree.cost[i] for i in goal_ids)

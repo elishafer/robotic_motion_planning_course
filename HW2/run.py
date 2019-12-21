@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 from time import time
 from statistics import mean, stdev
+from copy import deepcopy
 
 from MapEnvironment import MapEnvironment
 from RRTPlanner import RRTPlanner
@@ -40,18 +41,23 @@ def main(planning_env, planner, start, goal, planner_type):
 
     elif planner_type == 'rrtconnect':
         cost_dict = dict()
-        run_times =[0.1, 0.5, 1.0, 5.0, 10.0]
+        run_times =  [0.1, 0.5, 1.0, 5.0, 10.0, 20.0]
+        sample_times = [0.1, 0.5, 1.0, 5.0, 10.0, 20.0]
+        sample_times.reverse()
         successes = []
         for run_time in run_times:
             success = 0
             cost_dict[run_time] = []
             for i in range(10):
+                sample_times_copy = deepcopy(sample_times)
                 planner = RRTStarPlanner(planning_env)
-                planner_return = planner.Plan(start, goal, timeout=run_time)
+                planner_return = planner.Plan(start, goal, timeout=run_time, sample_times=sample_times_copy, k_type='log')
                 if planner_return is not None:
                     success += 1
-                    plan, cost, tree = planner_return
+                    plan, cost, tree, cost_at_time = planner_return
                     cost_dict[run_time].append(cost)
+                    if run_time == run_times[-1]:
+                        print('cost at time:', cost_at_time)
             print('For runtime of ', run_time, 'secs')
             if success > 1:
                 print('cost avg :', mean(cost_dict[run_time]))
@@ -59,7 +65,10 @@ def main(planning_env, planner, start, goal, planner_type):
             elif success > 0 :
                 print('cost:', cost_dict[run_time][0])
             print('success: ', success)
-            success.append(success)
+            successes.append(success)
+            # if planner_return is not None:
+            #     planning_env.visualize_plan(plan, tree=tree)
+
         print('successes', successes)
         print('costs:', cost_dict)
 
