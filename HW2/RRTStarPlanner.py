@@ -27,8 +27,8 @@ class RRTStarPlanner(object):
         # TODO (student): Implement your planner here.
         while True:
             x_rand = self.sample(goal_sample_rate)
-            v_nearest_id, dist = self.tree.GetNearestVertex(x_rand)
-            v_nearest = self.tree.vertices[v_nearest_id]
+            v_nearest_id, v_nearest = self.tree.GetNearestVertex(x_rand)
+            # v_nearest = self.tree.vertices[v_nearest_id]
             v_new = self.extend(v_nearest, x_rand, eta)
             v_new = np.int_(v_new.round())
             if self.planning_env.state_validity_checker(v_new):
@@ -73,6 +73,7 @@ class RRTStarPlanner(object):
         best_vid = self.get_best_vid(goal_config, 1.0)
         if best_vid is None:
             return None
+        print('goal reached!')
         total_cost = self.tree.cost[best_vid]
         plan.append(goal_config)
         last_index = best_vid

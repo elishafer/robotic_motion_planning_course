@@ -39,10 +39,29 @@ def main(planning_env, planner, start, goal, planner_type):
         print('time stdev:', stdev(time_list))
 
     elif planner_type == 'rrtconnect':
-        cost_list = []
-        planner_return = planner.Plan(start, goal)
-        if planner_return is not None:
-            plan, cost, tree = planner_return
+        cost_dict = dict()
+        run_times =[0.1, 0.5, 1.0, 5.0, 10.0]
+        successes = []
+        for run_time in run_times:
+            success = 0
+            cost_dict[run_time] = []
+            for i in range(10):
+                planner = RRTStarPlanner(planning_env)
+                planner_return = planner.Plan(start, goal, timeout=run_time)
+                if planner_return is not None:
+                    success += 1
+                    plan, cost, tree = planner_return
+                    cost_dict[run_time].append(cost)
+            print('For runtime of ', run_time, 'secs')
+            if success > 1:
+                print('cost avg :', mean(cost_dict[run_time]))
+                print('cost stdev:', stdev(cost_dict[run_time]))
+            elif success > 0 :
+                print('cost:', cost_dict[run_time][0])
+            print('success: ', success)
+            success.append(success)
+        print('successes', successes)
+        print('costs:', cost_dict)
 
         # Shortcut the path.
     # TODO (student): Do not shortcut when comparing the performance of algorithms. 
