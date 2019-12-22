@@ -47,12 +47,10 @@ class MapEnvironment(object):
         else:
             return False
 
-
-
     def compute_heuristic(self, config):
         return self.compute_distance(config, self.goal)
 
-    def visualize_plan(self, plan, visited=None):
+    def visualize_plan(self, plan=None, visited=None, tree=None):
         '''
         Visualize the final path
         @param plan Sequence of states defining the plan.
@@ -60,8 +58,14 @@ class MapEnvironment(object):
         plt.imshow(self.map, interpolation='nearest', cmap='Greys')
         if visited is not None:
             plt.imshow(visited)
-        for i in range(np.shape(plan)[0] - 1):
-            x = [plan[i,0], plan[i+1, 0]]
-            y = [plan[i,1], plan[i+1, 1]]
-            plt.plot(y, x, 'r')
+        elif tree is not None:
+            nodes = tree.vertices
+            for k, v in tree.edges.items():
+                plt.plot([nodes[k][1], nodes[v][1]], [
+                    nodes[k][0], nodes[v][0]], "-g")
+        if plan is not None:
+            for i in range(np.shape(plan)[0] - 1):
+                x = [plan[i,0], plan[i+1, 0]]
+                y = [plan[i,1], plan[i+1, 1]]
+                plt.plot(y, x, 'r')
         plt.show()
