@@ -21,7 +21,8 @@ class RRTPlanner(object):
         self.tree.SetCost(0,0)
 
         # TODO (student): Implement your planner here.
-        for i in range(max_iterations):
+        # for i in range(max_iterations):
+        while True:
             x_rand = self.sample(goal_sample_rate)
             v_nearest_id, dist = self.tree.GetNearestVertex(x_rand)
             v_nearest = self.tree.vertices[v_nearest_id]

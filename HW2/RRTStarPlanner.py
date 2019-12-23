@@ -12,7 +12,7 @@ class RRTStarPlanner(object):
         self.map_shape = self.planning_env.map.shape
         self.bounds = [(0, self.map_shape[0] - 1), (0, self.map_shape[1] - 1)]
 
-    def Plan(self, start_config, goal_config, eta=float(5.0), goal_sample_rate=5, timeout=float(1.0), sample_times=None, k_type='log'):
+    def Plan(self, start_config, goal_config, eta=float(5.0), goal_sample_rate=5, timeout=float(1.0), sample_times=None, k_type='log', const_val=30):
 
         start_time = time()
         compute_distance = self.planning_env.compute_distance
@@ -37,7 +37,7 @@ class RRTStarPlanner(object):
                 if k_type == 'log':
                     k = int(e*1.5*log(len(self.tree.vertices)))
                 elif k_type == 'const':
-                    k = 30
+                    k = const_val
                 knn_ids = list(self.tree.GetKNN(v_new, k))
                 if not self.planning_env.edge_validity_checker(v_nearest, v_new):
                     continue

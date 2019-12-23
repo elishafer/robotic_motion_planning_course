@@ -50,7 +50,7 @@ class MapEnvironment(object):
     def compute_heuristic(self, config):
         return self.compute_distance(config, self.goal)
 
-    def visualize_plan(self, plan=None, visited=None, tree=None):
+    def visualize_plan(self, plan=None, visited=None, tree=None, title=None):
         '''
         Visualize the final path
         @param plan Sequence of states defining the plan.
@@ -68,4 +68,5 @@ class MapEnvironment(object):
                 x = [plan[i,0], plan[i+1, 0]]
                 y = [plan[i,1], plan[i+1, 1]]
                 plt.plot(y, x, 'r')
+        if title: plt.title(title)
         plt.show()
