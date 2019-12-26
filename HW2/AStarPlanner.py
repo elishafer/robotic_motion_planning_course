@@ -39,7 +39,7 @@ class AStarPlanner(object):
                 if t_g < g[neighbour]:
                     came_from[neighbour] = current
                     g[neighbour] = t_g
-                    f[neighbour] = g[neighbour] + 1 * compute_heuristic(neighbour)
+                    f[neighbour] = g[neighbour] + 20 * compute_heuristic(neighbour)
                     if neighbour not in open_set:
                         open_set[neighbour] = f[neighbour]
 

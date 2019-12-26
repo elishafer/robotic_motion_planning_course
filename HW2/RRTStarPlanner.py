@@ -27,6 +27,7 @@ class RRTStarPlanner(object):
         cost_at_time = dict()
 
         # TODO (student): Implement your planner here.
+        prev_time = time()
         while True:
             x_rand = self.sample(goal_sample_rate)
             v_nearest_id, v_nearest = self.tree.GetNearestVertex(x_rand)
@@ -90,6 +91,7 @@ class RRTStarPlanner(object):
             return None
         print('goal reached!')
         total_cost = self.tree.cost[best_vid]
+        print('Total cost: ', total_cost)
         plan.append(goal_config)
         last_index = best_vid
         while self.tree.edges[last_index] != 0:

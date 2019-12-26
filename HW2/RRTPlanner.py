@@ -12,7 +12,7 @@ class RRTPlanner(object):
         
 
     def Plan(self, start_config, goal_config, eta=float('Inf'), goal_sample_rate=20, max_iterations=8000):
-        
+        print(self.bounds)
         # Initialize an empty plan.
         plan = []
 

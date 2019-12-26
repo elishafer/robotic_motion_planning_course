@@ -50,32 +50,40 @@ def main(planning_env, planner, start, goal, planner_type):
                 planning_env.visualize_plan(plan, tree=tree, title=title)
 
     elif planner_type == 'rrtconnect':
-        const_vals = [3, 5, 10, 20, 30]
+        const_vals = [3, 5, 10, 20, 30, 40, -1]
+        k_to_cost_vals = {}
         for const_val in const_vals:
+            ktype = 'const'
+            if (const_val == -1): ktype='log'
             cost_dict = dict()
-            run_times = [0.1, 0.5, 1.0, 5.0, 7.5, 10.0, 15.0, 20.0]
-            sample_times = [0.1, 0.5, 1.0, 5.0, 7.5, 10.0, 15.0, 20.0]
+            cost_vals = []
+            run_times = [0.5, 1.0, 1.5, 7.5, 10.0, 15.0, 20.0, 30.0]
+            sample_times = [0.5, 1.0, 1.5, 7.5, 10.0, 15.0, 20.0, 30.0]
             sample_times.reverse()
             successes = []
             path_lengths = {}
             for run_time in run_times:
                 success = 0
                 cost_dict[run_time] = []
-                for i in range(10):
+                for i in range(1):
                     sample_times_copy = deepcopy(sample_times)
                     planner = RRTStarPlanner(planning_env)
-                    planner_return = planner.Plan(start, goal, timeout=run_time, sample_times=sample_times_copy, k_type='const', const_val=const_val)
+                    planner_return = planner.Plan(start, goal, timeout=run_time, sample_times=sample_times_copy, k_type=ktype, const_val=const_val)
+                    print(f"Finished run time = {run_time}")
                     if planner_return is not None:
                         success += 1
                         plan, cost, tree, cost_at_time = planner_return
+                        cost_vals.append(cost)
                         cost_dict[run_time].append(cost)
-                    else:
-                        cost_dict[run_time].append(None)
                         if run_time == run_times[-1]:
                             print('cost at time:', cost_at_time)
+                    else:
+                        cost_dict[run_time].append(None)
+
                     print(f"k = {const_val}, Run time: {run_time}, iter: {i}")
                 successes.append(success)
             print(f"Results for k = {const_val}:")
+            print('costs:', cost_vals)
             print('successes', successes)
 
         # Shortcut the path.
