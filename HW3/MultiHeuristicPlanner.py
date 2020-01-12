@@ -24,8 +24,22 @@ class MultiHeuristicPlanner(object):
 
     def Plan(self, start_config, goal_config):
         plan = []
+        g = dict()
+        g[start_config] = 0
+        g[goal_config] = float('inf')
 
-        # TODO (student): Implement your planner here.
+        bp = dict()
+        bp[start_config] = None
+        bp[goal_config] = None
+
+        o_nodes = []
+        for i in range(2):
+            o_nodes[i] = dict()
+            o_nodes[i][(start_config,i)]
+
+        c_nodes_anchor = []
+        c_nodes_inad =[]
+
 
         plan.append(start_config)
         plan.append(goal_config)
