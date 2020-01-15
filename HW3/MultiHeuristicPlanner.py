@@ -4,8 +4,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
+VISUALISE = True
+
 class MultiHeuristicPlanner(object):
-    def __init__(self, planning_env, guidance, w1=20, w2=1.0):
+    def __init__(self, planning_env, guidance, w1=20, w2=2.5):
         """
 
         :param planning_env: The planning environment for the algorithm
@@ -51,7 +53,7 @@ class MultiHeuristicPlanner(object):
         bf = False
         j=0
         while True:
-            if not j%1000:
+            if VISUALISE and not j%1000:
                 self.planning_env.visualize_plan(visited=self.g)
             j+=1
             minkey[0] = self.o_nodes[0].queue[0][0]
@@ -96,7 +98,7 @@ class MultiHeuristicPlanner(object):
             if self.ancestor_of_g[s]:
                 return self.g[s] + self.w1 * self.planning_env.compute_heuristic(s)
             else:
-                return self.g[s] + self.w1 * self.planning_env.compute_distance(s, self.guidance)
+                return self.g[s] + self.w1 * (self.planning_env.compute_distance(s, self.guidance) + self.planning_env.compute_heuristic(self.guidance))
 
     def expand_state(self, s):
         c = self.planning_env.compute_distance
@@ -114,6 +116,8 @@ class MultiHeuristicPlanner(object):
                 self.bp[sp] = s
                 if sp not in self.c_nodes_anchor:
                     self.insert_update(sp, 0)
+                    if (s == self.guidance) or self.ancestor_of_g[s]:
+                        self.ancestor_of_g[sp] = True
                     if sp not in self.c_nodes_inad:
                         for i in range(1, self.n):
                             if self.key_heuristic(sp, i) <= self.w2 *self.key_heuristic(sp, 0):
