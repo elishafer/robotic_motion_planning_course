@@ -5,12 +5,13 @@ import argparse
 from AStarPlanner import AStarPlanner
 from IPython import embed
 from MapEnvironment import MapEnvironment
-from MultiHeuristicPlannerSolution import MultiHeuristicPlanner
+from MultiHeuristicPlanner import MultiHeuristicPlanner
 
 
 def main(planning_env, planner, start, goal):
     # Notify.
-    input('Press any key to begin planning')
+    # input('Press any key to begin planning')
+    print('Starting plan')
     planning_env.visualize_env()
 
     # Plan.
@@ -45,7 +46,7 @@ if __name__ == "__main__":
     if args.planner == 'astar':
         planner = AStarPlanner(planning_env)
     elif args.planner == 'mhastar':
-        planner = MultiHeuristicPlanner(planning_env, list(zip(args.userGuidance[::2], args.userGuidance[1::2])))
+        planner = MultiHeuristicPlanner(planning_env, list(zip(args.userGuidance[::2], args.userGuidance[1::2]))[0])
     else:
         print('Unknown planner option: %s' % args.planner)
         exit(0)

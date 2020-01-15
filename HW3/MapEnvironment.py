@@ -1,6 +1,7 @@
 import numpy as np
 from IPython import embed
 from matplotlib import pyplot as plt
+from math import hypot
 
 class MapEnvironment(object):
     
@@ -23,8 +24,9 @@ class MapEnvironment(object):
         #plt.imshow(self.map, interpolation='nearest')
 
     def compute_distance(self, start_config, end_config):
-        s, g = np.array(start_config), np.array(end_config)
-        return np.linalg.norm(g-s)
+
+        return hypot(start_config[0] - end_config[0], start_config[1] - end_config[1])
+
 
     def state_validity_checker(self, config):
         # check within limit
@@ -56,18 +58,39 @@ class MapEnvironment(object):
     def compute_heuristic(self, config):
         return self.compute_distance(config, self.goal)
 
-    def visualize_plan(self, plan):
+    # def visualize_plan(self, plan):
+    #     '''
+    #     Visualize the final path
+    #     @param plan Sequence of states defining the plan.
+    #     '''
+    #     plt.imshow(self.map, interpolation='nearest')
+    #     plt.plot(self.start[1], self.start[0], 'o', color='r')
+    #     plt.plot(self.goal[1], self.goal[0], 'o', color='g')
+    #     for i in range(np.shape(plan)[0] - 1):
+    #         x = [plan[i,0], plan[i+1, 0]]
+    #         y = [plan[i,1], plan[i+1, 1]]
+    #         plt.plot(y, x, 'k')
+    #     plt.show()
+
+    def visualize_plan(self, plan=None, visited=None, tree=None, title=None):
         '''
         Visualize the final path
         @param plan Sequence of states defining the plan.
         '''
-        plt.imshow(self.map, interpolation='nearest')
-        plt.plot(self.start[1], self.start[0], 'o', color='r')
-        plt.plot(self.goal[1], self.goal[0], 'o', color='g')
-        for i in range(np.shape(plan)[0] - 1):
-            x = [plan[i,0], plan[i+1, 0]]
-            y = [plan[i,1], plan[i+1, 1]]
-            plt.plot(y, x, 'k')
+        plt.imshow(self.map, interpolation='nearest', cmap='Greys')
+        if visited is not None:
+            plt.imshow(visited)
+        elif tree is not None:
+            nodes = tree.vertices
+            for k, v in tree.edges.items():
+                plt.plot([nodes[k][1], nodes[v][1]], [
+                    nodes[k][0], nodes[v][0]], "-g")
+        if plan is not None:
+            for i in range(np.shape(plan)[0] - 1):
+                x = [plan[i,0], plan[i+1, 0]]
+                y = [plan[i,1], plan[i+1, 1]]
+                plt.plot(y, x, 'r')
+        if title: plt.title(title)
         plt.show()
 
     def visualize_env(self):
