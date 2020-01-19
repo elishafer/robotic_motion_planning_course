@@ -2,8 +2,10 @@ import sys
 import time
 import numpy as np
 
+VISUALISE = True
+
 class AStarPlanner(object):    
-    def __init__(self, planning_env, w=1):
+    def __init__(self, planning_env, w=20.0):
         self.planning_env = planning_env
         self.nodes = dict()
         self.w = w
@@ -24,7 +26,11 @@ class AStarPlanner(object):
         f[start_config] = compute_heuristic(start_config)
         open_set = {start_config: 0}
         came_from = dict()
+        j = 0
         while True:
+            if VISUALISE and not j%1000:
+                self.planning_env.visualize_plan(visited=g)
+            j+=1
             current = min(open_set, key=open_set.get)
             if current == goal_config:
                 break
