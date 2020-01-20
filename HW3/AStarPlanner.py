@@ -3,9 +3,10 @@ import time
 import numpy as np
 
 class AStarPlanner(object):    
-    def __init__(self, planning_env):
+    def __init__(self, planning_env, w=1):
         self.planning_env = planning_env
         self.nodes = dict()
+        self.w = w
 
     def Plan(self, start_config, goal_config):
 
@@ -39,7 +40,7 @@ class AStarPlanner(object):
                 if t_g < g[neighbour]:
                     came_from[neighbour] = current
                     g[neighbour] = t_g
-                    f[neighbour] = g[neighbour] + 1 * compute_heuristic(neighbour)
+                    f[neighbour] = g[neighbour] + self.w * compute_heuristic(neighbour)
                     if neighbour not in open_set:
                         open_set[neighbour] = f[neighbour]
 
