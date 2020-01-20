@@ -46,7 +46,7 @@ if __name__ == "__main__":
     if args.planner == 'astar':
         planner = AStarPlanner(planning_env, w=20)
     elif args.planner == 'mhastar':
-        planner = MultiHeuristicPlanner(planning_env, list(zip(args.userGuidance[::2], args.userGuidance[1::2]))[0])
+        planner = MultiHeuristicPlanner(planning_env, list(zip(args.userGuidance[::2], args.userGuidance[1::2]))[0], w1=10, w2=2)
     else:
         print('Unknown planner option: %s' % args.planner)
         exit(0)

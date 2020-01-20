@@ -2,7 +2,7 @@ import sys
 import time
 import numpy as np
 
-VISUALISE = True
+VISUALISE = False
 
 class AStarPlanner(object):    
     def __init__(self, planning_env, w=20.0):

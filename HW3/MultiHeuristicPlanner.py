@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-VISUALISE = True
+VISUALISE = False
 
 class MultiHeuristicPlanner(object):
     def __init__(self, planning_env, guidance, w1=20, w2=2.5):

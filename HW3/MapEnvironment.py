@@ -100,4 +100,5 @@ class MapEnvironment(object):
         plt.imshow(self.map, interpolation='nearest')
         plt.plot(self.start[1], self.start[0], 'o', color='r')
         plt.plot(self.goal[1], self.goal[0], 'o', color='g')
+        plt.plot([self.start[1], self.goal[1]], [self.start[0], self.goal[0]], 'c-')
         plt.show()
