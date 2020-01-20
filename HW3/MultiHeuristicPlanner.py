@@ -92,7 +92,7 @@ class MultiHeuristicPlanner(object):
         expansion_count = np.count_nonzero(~np.isinf(self.g))
         print(f"# expanded nodes = {expansion_count}")
         print(f"Cost of path = {self.g[goal_config]}")
-        return np.array(plan)
+        return np.array(plan), self.g
 
     def key_heuristic(self, s, i):
         if i == 0:

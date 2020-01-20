@@ -54,9 +54,9 @@ class AStarPlanner(object):
 
         expansion_count = np.count_nonzero(~np.isinf(g))
         print('expanded nodes:', expansion_count)
-
+        print(f"Cost of path: {g[goal_config]}")
         # return np.array(plan), g[goal_config], f
-        return np.array(plan)
+        return np.array(plan), g
 
 
     def find_neighbours(self, config, map_shape):

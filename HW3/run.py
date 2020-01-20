@@ -15,10 +15,10 @@ def main(planning_env, planner, start, goal):
     planning_env.visualize_env()
 
     # Plan.
-    plan = planner.Plan(start, goal)
+    plan, g = planner.Plan(start, goal)
 
     # Visualize the final path.
-    planning_env.visualize_plan(plan)
+    planning_env.visualize_plan(plan, visited=g)
     exit(0)
 	
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # Next setup the planner
     if args.planner == 'astar':
-        planner = AStarPlanner(planning_env)
+        planner = AStarPlanner(planning_env, w=20)
     elif args.planner == 'mhastar':
         planner = MultiHeuristicPlanner(planning_env, list(zip(args.userGuidance[::2], args.userGuidance[1::2]))[0])
     else:
